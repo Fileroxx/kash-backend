@@ -6,7 +6,19 @@ const cookieParser = require("cookie-parser");
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+
+// Defina as opções de configuração do CORS
+const corsOptions = {
+  origin: "*", // Permita todas as origens (você pode restringir para as origens específicas que desejar)
+  methods: "GET,PUT,POST,DELETE", // Permita os métodos HTTP necessários
+  allowedHeaders: "Content-Type,Authorization", // Permita os cabeçalhos necessários
+};
+
+// Aplicar as opções de configuração do CORS
+app.use(cors(corsOptions));
+
+
 app.use(express.json());
 app.use(cookieParser());
 

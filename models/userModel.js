@@ -7,6 +7,9 @@ const db = mysql.createConnection({
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DBNAME,
+    // Adicione as seguintes configurações para reconexão automática
+    reconnect: true,
+    reconnectInterval: 2000, // Intervalo de tempo para tentar reconectar (em milissegundos)
 });
 
 db.connect((err) => {

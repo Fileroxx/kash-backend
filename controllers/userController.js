@@ -11,12 +11,17 @@ const getUsers = (req, res) => {
     });
 };
 
-const getUserById = (req, res) => {
-  const userId = req.params.id;
-  userService.getUserById(userId)
+const getUserByToken = (req, res) => {
+  const token = req.headers.authorization; // Obtém o token do cabeçalho Authorization
+  userService.getUserByToken(token)
     .then((result) => {
       if (result) {
-        res.json(result);
+        const userData = {
+          name: result.name,
+          email: result.email,
+          password: result.password
+        };
+        res.json(userData);
       } else {
         res.json("User not found");
       }
@@ -54,7 +59,7 @@ const getAtivos = (req, res) => {
 
 module.exports = {
   getUsers,
-  getUserById,
+  getUserByToken,
   createAtivo,
   getAtivos,
 };

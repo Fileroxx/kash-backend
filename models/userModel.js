@@ -49,6 +49,21 @@ const findAll = () => {
   });
 };
 
+const findByEmailAndPassword = (email, password) => {
+  const sql = "SELECT * FROM login WHERE email = ? AND password = ?";
+  const values = [email, password];
+  return new Promise((resolve, reject) => {
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result[0]);
+      }
+    });
+  });
+};
+
+
 const findById = (userId) => {
   const sql = "SELECT * FROM login WHERE id = ?";
   const values = [userId];
@@ -94,6 +109,7 @@ const findAtivosByUserId = (userId) => {
 module.exports = {
   createUser,
   findAll,
+  findByEmailAndPassword,
   findById,
   createAtivo,
   findAtivosByUserId,

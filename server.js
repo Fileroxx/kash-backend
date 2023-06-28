@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -10,10 +11,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "", // Coloque sua senha aqui, se houver
-  database: "signup",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DBNAME,
 });
 
 db.connect((err) => {
@@ -148,7 +149,7 @@ app.post("/user/:token/ativo", (req, res) => {
     const userId = decodedToken.userId;
     const { nomeAtivo, quantidadeAtivos, valorAtivo } = req.body;
 
-    const sql = "INSERT INTO stocks.ativos (nomeAtivo, quantidadeAtivos, valorAtivo, userId) VALUES (?, ?, ?, ?)";
+    const sql = "INSERT * FROM ativos (nomeAtivo, quantidadeAtivos, valorAtivo, userId) VALUES (?, ?, ?, ?)";
     const values = [nomeAtivo, quantidadeAtivos, valorAtivo, userId];
 
     db.query(sql, values, (err, result) => {
@@ -178,7 +179,7 @@ app.get("/user/:token/ativo", (req, res) => {
 
     const userId = decodedToken.userId;
 
-    const sql = "SELECT * FROM stocks.ativos WHERE userId = ?";
+    const sql = "SELECT * FROM ativos WHERE userId = ?";
     const values = [userId];
 
     db.query(sql, values, (err, result) => {

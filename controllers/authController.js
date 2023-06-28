@@ -1,5 +1,6 @@
 const authService = require("../services/authService");
 
+
 const signup = (req, res) => {
   const { name, email, password } = req.body;
   authService.signup(name, email, password)

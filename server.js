@@ -218,7 +218,9 @@ app.get("/user/:token/ativo", (req, res) => {
   }
 });
 
-const port = 8081;
+const port = process.env.PORT;
+
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });

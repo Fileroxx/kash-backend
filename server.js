@@ -60,7 +60,7 @@ app.post("/login", (req, res) => {
     }
 
     const user = result[0];
-    const token = jwt.sign({name: user.name, userId: user.id, email: user.email }, "chave-secreta", {
+    const token = jwt.sign({ name: user.name, userId: user.id, email: user.email }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -76,7 +76,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json("Token não fornecido");
   }
 
-  jwt.verify(token, "chave-secreta", (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json("Token inválido");
     }
@@ -98,9 +98,32 @@ app.get("/users", authenticateToken, (req, res) => {
   });
 });
 
-app.get("/users/all", (req, res) => {
-  const sql = "SELECT * FROM login";
-  db.query(sql, (err, result) => {
+app.get("/user/:id", authenticateToken, (req, res) => {
+  const userId = req.params.id;
+  const sql = "SELECT * FROM login WHERE id = ?";
+  const values = [userId];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Error");
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json("Usuário não encontrado");
+    }
+
+    const user = result[0];
+    return res.json(user);
+  });
+});
+
+app.get("/ativos/:userId", authenticateToken, (req, res) => {
+  const userId = req.params.userId;
+  const sql = "SELECT * FROM ativos WHERE userId = ?";
+  const values = [userId];
+
+  db.query(sql, values, (err, result) => {
     if (err) {
       console.error("Erro ao executar a consulta: " + err.stack);
       return res.status(500).json("Error");
@@ -110,101 +133,26 @@ app.get("/users/all", (req, res) => {
   });
 });
 
+app.post("/ativos", authenticateToken, (req, res) => {
+  const { userId, nomeAtivo, quantidadeAtivos, valorAtivo } = req.body;
+  const sql = "INSERT INTO ativos (userId, nomeAtivo, quantidadeAtivos, valorAtivo) VALUES (?, ?, ?, ?)";
+  const values = [userId, nomeAtivo, quantidadeAtivos, valorAtivo];
 
-app.get("/user/:token", (req, res) => {
-  const token = req.params.token;
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.json("Error");
+    }
 
-  try {
-    const decodedToken = jwt.verify(token, "chave-secreta");
-
-    // Verificar se o token é válido e não expirado, se necessário
-
-    // Recuperar as informações do usuário do payload do token
-    const userId = decodedToken.userId;
-    const name = decodedToken.name;
-    const email = decodedToken.email;
-
-    // Use as informações do usuário para fazer a consulta no banco de dados ou realizar outras ações necessárias
-
-    const user = {
-      userId,
-      name,
-      email
-    };
-
-    return res.json(user);
-  } catch (error) {
-    console.error("Erro ao verificar o token: " + error);
-    return res.status(401).json("Token inválido");
-  }
+    if (result.affectedRows > 0) {
+      return res.json("Success");
+    } else {
+      return res.json("Failed");
+    }
+  });
 });
 
-
-app.post("/user/:token/ativo", (req, res) => {
-  const token = req.params.token;
-
-  try {
-    const decodedToken = jwt.verify(token, "chave-secreta");
-
-    const userId = decodedToken.userId;
-    const { nomeAtivo, quantidadeAtivos, valorAtivo } = req.body;
-
-    const sql = "INSERT * FROM ativos (nomeAtivo, quantidadeAtivos, valorAtivo, userId) VALUES (?, ?, ?, ?)";
-    const values = [nomeAtivo, quantidadeAtivos, valorAtivo, userId];
-
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        console.error("Erro ao executar a consulta: " + err.stack);
-        return res.status(500).json("Error");
-      }
-
-      if (result.affectedRows > 0) {
-        return res.json("Success");
-      } else {
-        return res.json("Failed");
-      }
-    });
-  } catch (error) {
-    console.error("Erro ao verificar o token: " + error);
-    return res.status(401).json("Token inválido");
-  }
-});
-
-
-app.get("/user/:token/ativo", (req, res) => {
-  const token = req.params.token;
-
-  try {
-    const decodedToken = jwt.verify(token, "chave-secreta");
-
-    const userId = decodedToken.userId;
-
-    const sql = "SELECT * FROM ativos WHERE userId = ?";
-    const values = [userId];
-
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        console.error("Erro ao executar a consulta: " + err.stack);
-        return res.status(500).json("Error");
-      }
-
-      // Mapear os resultados do banco de dados para um formato desejado (opcional)
-      const ativos = result.map((row) => ({
-        id: row.id,
-        nome: row.nomeAtivo,
-        quantidade: row.quantidadeAtivos,
-        valor: row.valorAtivo,
-      }));
-
-      return res.json(ativos);
-    });
-  } catch (error) {
-    console.error("Erro ao verificar o token: " + error);
-    return res.status(401).json("Token inválido");
-  }
-});
-
-const port = 8081;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });

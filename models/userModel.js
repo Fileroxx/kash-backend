@@ -123,20 +123,7 @@ const findAtivosByUserId = (userId) => {
   });
 };
 
-const findUserByToken = (token) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT name, email, password FROM login WHERE token = ?";
-    const values = [token];
 
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result[0]);
-      }
-    });
-  });
-};
 
 module.exports = {
   createUser,
@@ -145,6 +132,5 @@ module.exports = {
   findById,
   createAtivo,
   findAtivosByUserId,
-  findUserByToken,
   updateUserToken
 };

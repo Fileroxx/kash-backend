@@ -11,17 +11,24 @@ const login = (email, password) => {
       const token = jwt.sign(
         { name: user.name, userId: user.id, email: user.email },
         process.env.SECRET_KEY,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" }        
       );
       
-      // Atualiza a coluna 'token' na tabela 'login' com o token gerado
-      return userModel.updateUserToken(user.id, token)
-        .then(() => token);
+      
+      const userData = {
+        name: user.name,
+        email: user.email,
+        token: token
+      };
+
+        return token && userData
+
+
+
     });
 };
 
-
 module.exports = {
   signup,
-  login,
+  login
 };

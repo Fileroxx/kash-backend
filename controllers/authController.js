@@ -16,8 +16,8 @@ const signup = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
   authService.login(email, password)
-    .then((token) => {
-      res.json({ token });
+    .then((token, name, email) => {
+      res.json({ token, name, email });
     })
     .catch((error) => {
       console.error("Erro ao executar a consulta: " + error.stack);

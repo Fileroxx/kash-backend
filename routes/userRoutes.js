@@ -5,7 +5,7 @@ const authenticateToken = require("../middlewares/authentication");
 const router = express.Router();
 
 router.get("/users", userController.getUsers);
-router.get("/user", userController.getUserByToken);
+router.get("/user", authenticateToken, userController.getUserByToken);
 router.post("/ativo", authenticateToken, userController.createAtivo);
 router.get("/ativo", authenticateToken, userController.getAtivos);
 

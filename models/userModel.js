@@ -36,6 +36,23 @@ const createUser = (name, email, password) => {
   });
 };
 
+const updateUserToken = (userId, token) => {
+  return new Promise((resolve, reject) => {
+    const sql = 'UPDATE login SET token = ? WHERE id = ?';
+    const values = [token, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+
+
 const findAll = () => {
   const sql = "SELECT * FROM login";
   return new Promise((resolve, reject) => {
@@ -106,10 +123,10 @@ const findAtivosByUserId = (userId) => {
   });
 };
 
-const findUserByToken = (name, email, password) => {
+const findUserByToken = (token) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT name, email, password FROM login";
-    const values = [name, email, password];
+    const sql = "SELECT name, email, password FROM login WHERE token = ?";
+    const values = [token];
 
     db.query(sql, values, (err, result) => {
       if (err) {
@@ -128,5 +145,6 @@ module.exports = {
   findById,
   createAtivo,
   findAtivosByUserId,
-  findUserByToken
+  findUserByToken,
+  updateUserToken
 };

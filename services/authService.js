@@ -13,9 +13,13 @@ const login = (email, password) => {
         process.env.SECRET_KEY,
         { expiresIn: "1h" }
       );
-      return token;
+      
+      // Atualiza a coluna 'token' na tabela 'login' com o token gerado
+      return userModel.updateUserToken(user.id, token)
+        .then(() => token);
     });
 };
+
 
 module.exports = {
   signup,

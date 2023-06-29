@@ -33,7 +33,7 @@ const getUsers = (req, res) => {
 
 const getUserByToken = (req, res) => {
   const token = req.headers.authorization;
-  console.log('Token:', token);
+
   db.query('SELECT name, email, password FROM login WHERE token = ?', [token], (error, results) => {
     if (error) {
       console.error("Erro ao executar a consulta: " + error.stack);

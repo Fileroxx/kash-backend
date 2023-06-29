@@ -13,7 +13,7 @@ const getUsers = (req, res) => {
 
 const getUserByToken = (req, res) => {
   const token = req.headers.authorization; // Obtém o token do cabeçalho Authorization
-  userService.getUserByToken(token)
+  userService.getUserById(token)
     .then((result) => {
       if (result) {
         const userData = {

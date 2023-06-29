@@ -5,8 +5,12 @@ const getUsers = () => {
 };
 
 const getUserById = (userId) => {
-  return userModel.findById(userId);
+  return userModel.findUserByToken(userId);
 };
+
+const getUserByToken = () => {
+  return userModel.findById();
+}
 
 const createAtivo = (userId, nomeAtivo, quantidadeAtivos, valorAtivo) => {
   return userModel.createAtivo(userId, nomeAtivo, quantidadeAtivos, valorAtivo);
@@ -21,4 +25,5 @@ module.exports = {
   getUserById,
   createAtivo,
   getAtivos,
+  getUserByToken
 };

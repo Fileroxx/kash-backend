@@ -106,6 +106,21 @@ const findAtivosByUserId = (userId) => {
   });
 };
 
+const findUserByToken = (name, email, password) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT name, email, password FROM login";
+    const values = [name, email, password];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result[0]);
+      }
+    });
+  });
+};
+
 module.exports = {
   createUser,
   findAll,
@@ -113,4 +128,5 @@ module.exports = {
   findById,
   createAtivo,
   findAtivosByUserId,
+  findUserByToken
 };

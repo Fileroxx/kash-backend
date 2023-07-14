@@ -1,15 +1,14 @@
 const mysql = require("mysql");
 require('dotenv').config();
 
-
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DBNAME,
-    // Adicione as seguintes configurações para reconexão automática
-    reconnect: true,
-    reconnectInterval: 2000, // Intervalo de tempo para tentar reconectar (em milissegundos)
+  // Adicione as seguintes configurações para reconexão automática
+  reconnect: true,
+  reconnectInterval: 2000, // Intervalo de tempo para tentar reconectar (em milissegundos)
 });
 
 db.connect((err) => {
@@ -21,6 +20,7 @@ db.connect((err) => {
 });
 
 
+
 const createUser = (name, email, password) => {
   return new Promise((resolve, reject) => {
     const sql = "INSERT INTO login (name, email, password) VALUES (?, ?, ?)";
@@ -28,6 +28,7 @@ const createUser = (name, email, password) => {
 
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta createUser:", err);
         reject(err);
       } else {
         resolve(result);
@@ -43,6 +44,7 @@ const updateUserToken = (userId, token) => {
 
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta updateUserToken:", err);
         reject(err);
       } else {
         resolve();
@@ -51,13 +53,12 @@ const updateUserToken = (userId, token) => {
   });
 };
 
-
-
 const findAll = () => {
   const sql = "SELECT * FROM login";
   return new Promise((resolve, reject) => {
     db.query(sql, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta findAll:", err);
         reject(err);
       } else {
         resolve(result);
@@ -72,6 +73,7 @@ const findByEmailAndPassword = (email, password) => {
   return new Promise((resolve, reject) => {
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta findByEmailAndPassword:", err);
         reject(err);
       } else {
         resolve(result[0]);
@@ -80,13 +82,13 @@ const findByEmailAndPassword = (email, password) => {
   });
 };
 
-
 const findById = (userId) => {
   const sql = "SELECT * FROM login WHERE id = ?";
   const values = [userId];
   return new Promise((resolve, reject) => {
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta findById:", err);
         reject(err);
       } else {
         resolve(result[0]);
@@ -101,6 +103,7 @@ const createAtivo = (userId, nomeAtivo, quantidadeAtivos, valorAtivo) => {
   return new Promise((resolve, reject) => {
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta createAtivo:", err);
         reject(err);
       } else {
         resolve(result);
@@ -115,6 +118,7 @@ const findAtivosByUserId = (userId) => {
   return new Promise((resolve, reject) => {
     db.query(sql, values, (err, result) => {
       if (err) {
+        console.error("Erro ao executar a consulta findAtivosByUserId:", err);
         reject(err);
       } else {
         resolve(result);
@@ -122,8 +126,6 @@ const findAtivosByUserId = (userId) => {
     });
   });
 };
-
-
 
 module.exports = {
   createUser,

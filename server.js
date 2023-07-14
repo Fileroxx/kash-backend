@@ -164,19 +164,19 @@ app.post("/user/:token/ativo", (req, res) => {
     const userId = decodedToken.userId;
     const { nomeAtivo, quantidadeAtivos, valorAtivo } = req.body;
 
-    const sql = "INSERT * FROM ativos (nomeAtivo, quantidadeAtivos, valorAtivo, userId) VALUES (?, ?, ?, ?)";
+    const sql = "INSERT INTO ativos (nomeAtivo, quantidadeAtivos, valorAtivo, userId) VALUES (?, ?, ?, ?)";
     const values = [nomeAtivo, quantidadeAtivos, valorAtivo, userId];
 
     db.query(sql, values, (err, result) => {
       if (err) {
         console.error("Erro ao executar a consulta: " + err.stack);
-        return res.status(500).json("Error");
+        return res.status(500).json("Erro");
       }
 
       if (result.affectedRows > 0) {
-        return res.json("Success");
+        return res.json("Sucesso");
       } else {
-        return res.json("Failed");
+        return res.json("Falha");
       }
     });
   } catch (error) {

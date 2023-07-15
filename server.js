@@ -20,7 +20,6 @@ app.use(cors({
   allowedHeaders: "Content-Type,Authorization", // Permite os cabeçalhos necessários
 }));
 
-
 app.use(express.json());
 app.use(cookieParser());
 
@@ -29,7 +28,7 @@ const db = mysql.createConnection({
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DBNAME,
-  port: process.env.DB_PORT 
+  port: process.env.DB_PORT
 });
 
 db.connect((err) => {
@@ -127,7 +126,6 @@ app.get("/users/all", (req, res) => {
   });
 });
 
-
 app.get("/user/:token", (req, res) => {
   const token = req.params.token;
 
@@ -155,7 +153,6 @@ app.get("/user/:token", (req, res) => {
     return res.status(401).json("Token inválido");
   }
 });
-
 
 app.post("/user/:token/ativo", (req, res) => {
   const token = req.params.token;
@@ -187,7 +184,6 @@ app.post("/user/:token/ativo", (req, res) => {
   }
 });
 
-
 app.get("/user/:token/ativo", (req, res) => {
   const token = req.params.token;
 
@@ -208,9 +204,9 @@ app.get("/user/:token/ativo", (req, res) => {
       // Mapear os resultados do banco de dados para um formato desejado (opcional)
       const ativos = result.map((row) => ({
         id: row.id,
-        nome: row.nomeAtivo,
-        quantidade: row.quantidadeAtivos,
-        valor: row.valorAtivo,
+        nomeAtivo: row.nomeAtivo,
+        quantidadeAtivos: row.quantidadeAtivos,
+        valorAtivo: row.valorAtivo,
       }));
 
       return res.json(ativos);
@@ -221,8 +217,7 @@ app.get("/user/:token/ativo", (req, res) => {
   }
 });
 
-const port = process.env.PORT;
-
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);

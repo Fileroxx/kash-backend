@@ -7,11 +7,15 @@ require('dotenv').config();
 
 const app = express();
 
-
+const allowedOrigins = [
+  "http://127.0.0.1:5173",
+  "https://smartfinsoluction-backend.vercel.app",
+  "https://smartfin-soluction.vercel.app"
+];
 
 // Aplicar as opções de configuração do CORS
 app.use(cors({
-  origin: "*", // Permite todas as origens
+  origin: allowedOrigins, // Permite todas as origens
   methods: "GET,PUT,POST,DELETE", // Permite os métodos HTTP necessários
   allowedHeaders: "Content-Type,Authorization", // Permite os cabeçalhos necessários
 }));

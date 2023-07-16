@@ -218,28 +218,7 @@ app.get("/user/:token/ativo", (req, res) => {
 });
 
 
-app.post("/alerta/:userId", (req, res) => {
-  const userId = req.params.userId;
-  const { ativo, gatilho, precoAlvo } = req.body;
-
-  const sql = "INSERT INTO alertas (userId, ativo, gatilho, precoAlvo) VALUES (?, ?, ?, ?)";
-  const values = [userId, ativo, gatilho, precoAlvo];
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Erro ao executar a consulta: " + err.stack);
-      return res.status(500).json("Erro ao criar o alerta");
-    }
-
-    if (result.affectedRows > 0) {
-      return res.json("Alerta criado com sucesso");
-    } else {
-      return res.json("Falha ao criar o alerta");
-    }
-  });
-});
-
-app.get("/alerta", authenticateToken, (req, res) => {
+app.get("/alerta", (req, res) => {
   const userId = req.user.userId;
 
   const sql = "SELECT * FROM alertas WHERE userId = ?";
@@ -263,7 +242,7 @@ app.get("/alerta", authenticateToken, (req, res) => {
   });
 });
 
-app.post("/alerta", authenticateToken, (req, res) => {
+app.post("/alerta", (req, res) => {
   const { ativo, gatilho, precoAlvo } = req.body;
   const userId = req.user.userId;
 

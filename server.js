@@ -217,6 +217,69 @@ app.get("/user/:token/ativo", (req, res) => {
   }
 });
 
+app.delete("/user/:token/ativo/:id", (req, res) => {
+  const token = req.params.token;
+  const ativoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+
+    const sql = "DELETE FROM ativos WHERE id = ? AND userId = ?";
+    const values = [ativoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Sucesso");
+      } else {
+        return res.json("Falha");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+
+app.put("/user/:token/ativo/:id", (req, res) => {
+  const token = req.params.token;
+  const ativoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+    const { nomeAtivo, quantidadeAtivos, valorAtivo } = req.body;
+
+    const sql = "UPDATE ativos SET nomeAtivo = ?, quantidadeAtivos = ?, valorAtivo = ? WHERE id = ? AND userId = ?";
+    const values = [nomeAtivo, quantidadeAtivos, valorAtivo, ativoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Sucesso");
+      } else {
+        return res.json("Falha");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+
 
 app.get("/alerta", (req, res) => {
   const userId = req.user.userId;

@@ -327,6 +327,137 @@ app.post("/alerta", (req, res) => {
 });
 
 
+// CREATE (Adicionar um novo gasto)
+app.post("/user/:token/gastos", (req, res) => {
+  const token = req.params.token;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+    const { categoria, valor } = req.body;
+
+    const sql = "INSERT INTO gastos (userId, categoria, valor) VALUES (?, ?, ?)";
+    const values = [userId, categoria, valor];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao criar o gasto");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Gasto criado com sucesso");
+      } else {
+        return res.json("Falha ao criar o gasto");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+
+app.get("/user/:token/gastos", (req, res) => {
+  const token = req.params.token;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+
+    const sql = "SELECT * FROM gastos WHERE userId = ?";
+    const values = [userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao obter os gastos");
+      }
+
+      // Mapear os resultados do banco de dados para um formato desejado (opcional)
+      const gastos = result.map((row) => ({
+        id: row.id,
+        categoria: row.categoria,
+        valor: row.valor,
+        dataCriacao: row.dataCriacao,
+        dataAtualizacao: row.dataAtualizacao,
+      }));
+
+      return res.json(gastos);
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+// UPDATE (Atualizar um gasto existente)
+app.put("/user/:token/gastos/:id", (req, res) => {
+  const token = req.params.token;
+  const gastoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+    const { categoria, valor } = req.body;
+
+    const sql = "UPDATE gastos SET categoria = ?, valor = ? WHERE id = ? AND userId = ?";
+    const values = [categoria, valor, gastoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao atualizar o gasto");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Gasto atualizado com sucesso");
+      } else {
+        return res.json("Falha ao atualizar o gasto");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+// DELETE (Excluir um gasto existente)
+
+app.delete("/user/:token/gastos/:id", (req, res) => {
+  const token = req.params.token;
+  const gastoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+
+    const sql = "DELETE FROM gastos WHERE id = ? AND userId = ?";
+    const values = [gastoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao excluir o gasto");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Gasto excluído com sucesso");
+      } else {
+        return res.json("Falha ao excluir o gasto");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {

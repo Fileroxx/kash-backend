@@ -458,73 +458,106 @@ app.delete("/user/:token/gastos/:id", (req, res) => {
 });
 
 app.post("/user/:token/renda", (req, res) => {
-  const userId = req.userId;
-  const { valor } = req.body;
+  const token = req.params.token;
 
-  const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
-  const values = [userId, valor ];
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
 
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Erro ao executar a consulta: " + err.stack);
-      return res.status(500).json("Erro ao adicionar renda");
-    }
+    const userId = decodedToken.userId;
+    const { valor } = req.body;
 
-    return res.json("Renda adicionada com sucesso");
-  });
+    const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
+    const values = [userId, valor, new Date()];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao adicionar renda");
+      }
+
+      return res.json("Renda adicionada com sucesso");
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
 });
-
 
 app.get("/user/:token/renda", (req, res) => {
-  const userId = req.userId;
+  const token = req.params.token;
 
-  const sql = "SELECT * FROM renda WHERE user_id = ?";
-  db.query(sql, [userId], (err, result) => {
-    if (err) {
-      console.error("Erro ao executar a consulta: " + err.stack);
-      return res.status(500).json("Erro ao buscar renda");
-    }
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+    const userId = decodedToken.userId;
 
-    const rendas = result;
-    return res.json(rendas);
-  });
+    const sql = "SELECT * FROM renda WHERE user_id = ?";
+    db.query(sql, [userId], (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao buscar renda");
+      }
+
+      const rendas = result;
+      return res.json(rendas);
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
 });
 
-
 app.put("/user/:token/renda/:rendaId", (req, res) => {
-  const userId = req.userId;
+  const token = req.params.token;
   const rendaId = req.params.rendaId;
   const { valor, data } = req.body;
 
-  const sql = "UPDATE renda SET valor = ?, data = ? WHERE id = ? AND user_id = ?";
-  const values = [valor, data, rendaId, userId];
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+    const userId = decodedToken.userId;
 
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Erro ao executar a consulta: " + err.stack);
-      return res.status(500).json("Erro ao atualizar renda");
-    }
+    const sql = "UPDATE renda SET valor = ?, data = ? WHERE id = ? AND user_id = ?";
+    const values = [valor, data, rendaId, userId];
 
-    return res.json("Renda atualizada com sucesso");
-  });
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao atualizar renda");
+      }
+
+      return res.json("Renda atualizada com sucesso");
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
 });
+
 
 app.delete("/user/:token/renda/:rendaId", (req, res) => {
-  const userId = req.userId;
+  const token = req.params.token;
   const rendaId = req.params.rendaId;
 
-  const sql = "DELETE FROM renda WHERE id = ? AND user_id = ?";
-  const values = [rendaId, userId];
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+    const userId = decodedToken.userId;
 
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Erro ao executar a consulta: " + err.stack);
-      return res.status(500).json("Erro ao deletar renda");
-    }
+    const sql = "DELETE FROM renda WHERE id = ? AND user_id = ?";
+    const values = [rendaId, userId];
 
-    return res.json("Renda deletada com sucesso");
-  });
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao deletar renda");
+      }
+
+      return res.json("Renda deletada com sucesso");
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
 });
+
 
 
 const port = process.env.PORT || 3000;

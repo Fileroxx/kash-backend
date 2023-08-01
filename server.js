@@ -457,7 +457,7 @@ app.delete("/user/:token/gastos/:id", (req, res) => {
   }
 });
 
-app.post("/user/:token/renda", authenticateToken, (req, res) => {
+app.post("/user/:token/renda", (req, res) => {
   const userId = req.userId;
   const { valor, data } = req.body;
 

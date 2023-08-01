@@ -457,113 +457,74 @@ app.delete("/user/:token/gastos/:id", (req, res) => {
   }
 });
 
-app.post('/user/:token/renda', async (req, res) => {
-  const token = req.params.token;
+app.post("/user/:token/renda", authenticateToken, (req, res) => {
+  const userId = req.userId;
   const { valor, data } = req.body;
 
-  try {
-    // Verificar se o token é válido e obter o ID do usuário associado a ele
-    const userId = await getUserIdFromToken(token);
+  const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
+  const values = [userId, valor, data];
 
-    // Inserir a renda na tabela
-    const result = await pool.query(
-      'INSERT INTO renda (user_id, valor, data) VALUES ($1, $2, $3) RETURNING *',
-      [userId, valor, data]
-    );
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Erro ao adicionar renda");
+    }
 
-    const novaRenda = result.rows[0];
-    res.json(novaRenda);
-  } catch (error) {
-    console.error('Erro ao adicionar renda:', error);
-    res.status(500).json({ message: 'Erro ao adicionar renda' });
-  }
-});
-
-app.get('/user/:token/renda', async (req, res) => {
-  const token = req.params.token;
-
-  try {
-    // Verificar se o token é válido e obter o ID do usuário associado a ele
-    const userId = await getUserIdFromToken(token);
-
-    // Buscar as entradas de renda na tabela
-    const result = await pool.query(
-      'SELECT * FROM renda WHERE user_id = $1',
-      [userId]
-    );
-
-    const rendas = result.rows;
-    res.json(rendas);
-  } catch (error) {
-    console.error('Erro ao buscar renda:', error);
-    res.status(500).json({ message: 'Erro ao buscar renda' });
-  }
+    return res.json("Renda adicionada com sucesso");
+  });
 });
 
 
-app.put('/user/:token/renda/:rendaId', async (req, res) => {
-  const token = req.params.token;
+app.get("/user/:token/renda", (req, res) => {
+  const userId = req.userId;
+
+  const sql = "SELECT * FROM renda WHERE user_id = ?";
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Erro ao buscar renda");
+    }
+
+    const rendas = result;
+    return res.json(rendas);
+  });
+});
+
+
+app.put("/user/:token/renda/:rendaId", (req, res) => {
+  const userId = req.userId;
   const rendaId = req.params.rendaId;
   const { valor, data } = req.body;
 
-  try {
-    // Verificar se o token é válido e obter o ID do usuário associado a ele
-    const userId = await getUserIdFromToken(token);
+  const sql = "UPDATE renda SET valor = ?, data = ? WHERE id = ? AND user_id = ?";
+  const values = [valor, data, rendaId, userId];
 
-    // Verificar se a renda pertence ao usuário
-    const result = await pool.query(
-      'SELECT * FROM renda WHERE id = $1 AND user_id = $2',
-      [rendaId, userId]
-    );
-
-    const rendaExistente = result.rows[0];
-    if (!rendaExistente) {
-      return res.status(404).json({ message: 'Renda não encontrada' });
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Erro ao atualizar renda");
     }
 
-    // Atualizar a renda na tabela
-    await pool.query(
-      'UPDATE renda SET valor = $1, data = $2 WHERE id = $3',
-      [valor, data, rendaId]
-    );
-
-    res.json({ message: 'Renda atualizada com sucesso' });
-  } catch (error) {
-    console.error('Erro ao atualizar renda:', error);
-    res.status(500).json({ message: 'Erro ao atualizar renda' });
-  }
+    return res.json("Renda atualizada com sucesso");
+  });
 });
 
-
-app.delete('/user/:token/renda/:rendaId', async (req, res) => {
-  const token = req.params.token;
+app.delete("/user/:token/renda/:rendaId", (req, res) => {
+  const userId = req.userId;
   const rendaId = req.params.rendaId;
 
-  try {
-    // Verificar se o token é válido e obter o ID do usuário associado a ele
-    const userId = await getUserIdFromToken(token);
+  const sql = "DELETE FROM renda WHERE id = ? AND user_id = ?";
+  const values = [rendaId, userId];
 
-    // Verificar se a renda pertence ao usuário
-    const result = await pool.query(
-      'SELECT * FROM renda WHERE id = $1 AND user_id = $2',
-      [rendaId, userId]
-    );
-
-    const rendaExistente = result.rows[0];
-    if (!rendaExistente) {
-      return res.status(404).json({ message: 'Renda não encontrada' });
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Erro ao deletar renda");
     }
 
-    // Deletar a renda da tabela
-    await pool.query('DELETE FROM renda WHERE id = $1', [rendaId]);
-
-    res.json({ message: 'Renda deletada com sucesso' });
-  } catch (error) {
-    console.error('Erro ao deletar renda:', error);
-    res.status(500).json({ message: 'Erro ao deletar renda' });
-  }
+    return res.json("Renda deletada com sucesso");
+  });
 });
-
 
 
 const port = process.env.PORT || 3000;

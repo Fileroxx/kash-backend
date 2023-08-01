@@ -459,10 +459,10 @@ app.delete("/user/:token/gastos/:id", (req, res) => {
 
 app.post("/user/:token/renda", (req, res) => {
   const userId = req.userId;
-  const { valor, data } = req.body;
+  const { valor } = req.body;
 
   const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
-  const values = [userId, valor, new Date()];
+  const values = [userId, valor ];
 
   db.query(sql, values, (err, result) => {
     if (err) {

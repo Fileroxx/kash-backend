@@ -466,8 +466,8 @@ app.post("/user/:token/renda", (req, res) => {
     const userId = decodedToken.userId;
     const { valor } = req.body;
 
-    const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
-    const values = [userId, valor, new Date()];
+    const sql = "INSERT INTO renda (user_id, valor) VALUES (?, ?)";
+    const values = [userId, valor];
 
     db.query(sql, values, (err, result) => {
       if (err) {

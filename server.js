@@ -462,7 +462,7 @@ app.post("/user/:token/renda", (req, res) => {
   const { valor, data } = req.body;
 
   const sql = "INSERT INTO renda (user_id, valor, data) VALUES (?, ?, ?)";
-  const values = [userId, valor, data];
+  const values = [userId, valor, new Date()];
 
   db.query(sql, values, (err, result) => {
     if (err) {

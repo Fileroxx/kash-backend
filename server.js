@@ -639,7 +639,7 @@ app.post('/recover-password', (req, res) => {
         from: 'seu_email@gmail.com',
         to: email,
         subject: 'Recuperação de Senha',
-        html: `<p>Olá! Você solicitou a recuperação de senha. Clique <a href="http://127.0.0.1:5173/esqueci/${recoveryToken}">aqui</a> para redefinir sua senha.</p>`,
+        html: `<p>Olá! Você solicitou a recuperação de senha. Clique <a href="https://smartfinsoluction.vercel.app/${recoveryToken}">aqui</a> para redefinir sua senha.</p>`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {

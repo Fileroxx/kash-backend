@@ -3,6 +3,8 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const nodemailer = require("nodemailer");
+
 require('dotenv').config();
 
 const app = express();
@@ -558,6 +560,67 @@ app.delete("/user/:token/renda/:rendaId", (req, res) => {
     console.error("Erro ao verificar o token: " + error);
     return res.status(401).json("Token inválido");
   }
+});
+
+// Configurar o transporter do nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "igor.fernandescesari@gmail.com",
+    pass: "hffvfwoyywrzlspx"
+  }
+});
+
+
+// Rota para recuperar senha
+app.post("/recover-password", (req, res) => {
+  const { email } = req.body;
+
+  // Verificar se o email existe no banco de dados
+  const sql = "SELECT * FROM login WHERE email = ?";
+  const values = [email];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Erro ao executar a consulta: " + err.stack);
+      return res.status(500).json("Error");
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json("Email não encontrado");
+    }
+
+    // Gerar um token de recuperação de senha (pode ser um token aleatório)
+    const recoveryToken = "token_aleatorio_aqui";
+
+    // Atualizar o registro do usuário no banco de dados com o token de recuperação
+    const updateSql = "UPDATE login SET recovery_token = ? WHERE email = ?";
+    const updateValues = [recoveryToken, email];
+
+    db.query(updateSql, updateValues, (err, updateResult) => {
+      if (err) {
+        console.error("Erro ao atualizar o token de recuperação: " + err.stack);
+        return res.status(500).json("Error");
+      }
+
+      // Enviar o email de recuperação
+      const mailOptions = {
+        from: "seu_email@gmail.com",
+        to: email,
+        subject: "Recuperação de Senha",
+        html: `<p>Olá! Você solicitou a recuperação de senha. Clique <a href="${process.env.FRONTEND_URL}/reset-password/${recoveryToken}">aqui</a> para redefinir sua senha.</p>`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Erro ao enviar o email de recuperação: " + error);
+          return res.status(500).json("Erro ao enviar o email de recuperação");
+        }
+
+        return res.json("Email de recuperação enviado com sucesso");
+      });
+    });
+  });
 });
 
 

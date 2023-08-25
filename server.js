@@ -572,11 +572,11 @@ const transporter = nodemailer.createTransport({
 });
 
 
-// Rota para recuperar senha
-app.post("/recover-password", (req, res) => {
+// Rota para recuperar a senha 
+
+app.post('/recover-password', (req, res) => {
   const { email } = req.body;
 
-  // Verificar se o email existe no banco de dados
   const sql = "SELECT * FROM login WHERE email = ?";
   const values = [email];
 
@@ -590,10 +590,8 @@ app.post("/recover-password", (req, res) => {
       return res.status(404).json("Email não encontrado");
     }
 
-    // Gerar um token de recuperação de senha (pode ser um token aleatório)
-    const recoveryToken = "token_aleatorio_aqui";
+    const recoveryToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    // Atualizar o registro do usuário no banco de dados com o token de recuperação
     const updateSql = "UPDATE login SET recovery_token = ? WHERE email = ?";
     const updateValues = [recoveryToken, email];
 
@@ -603,11 +601,10 @@ app.post("/recover-password", (req, res) => {
         return res.status(500).json("Error");
       }
 
-      // Enviar o email de recuperação
       const mailOptions = {
-        from: "seu_email@gmail.com",
+        from: 'seu_email@gmail.com',
         to: email,
-        subject: "Recuperação de Senha",
+        subject: 'Recuperação de Senha',
         html: `<p>Olá! Você solicitou a recuperação de senha. Clique <a href="${process.env.FRONTEND_URL}/reset-password/${recoveryToken}">aqui</a> para redefinir sua senha.</p>`,
       };
 

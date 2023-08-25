@@ -106,6 +106,40 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+app.put('/reset-password/:recoveryToken', (req, res) => {
+  const recoveryToken = req.params.recoveryToken;
+  const newPassword = req.body.newPassword;
+
+  const selectSql = "SELECT * FROM login WHERE recovery_token = ?";
+  db.query(selectSql, [recoveryToken], (selectErr, selectResult) => {
+    if (selectErr) {
+      console.error("Erro ao executar a consulta: " + selectErr.stack);
+      return res.status(500).json("Erro ao trocar a senha");
+    }
+
+    if (selectResult.length === 0) {
+      return res.status(404).json("Token de recuperação inválido");
+    }
+
+    const user = selectResult[0];
+    const userId = user.id;
+
+    const updateSql = "UPDATE login SET password = ?, recovery_token = NULL WHERE id = ?";
+    db.query(updateSql, [newPassword, userId], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error("Erro ao executar a consulta: " + updateErr.stack);
+        return res.status(500).json("Erro ao trocar a senha");
+      }
+
+      if (updateResult.affectedRows > 0) {
+        return res.json("Senha trocada com sucesso");
+      } else {
+        return res.status(500).json("Erro ao trocar a senha");
+      }
+    });
+  });
+});
+
 app.get("/users", authenticateToken, (req, res) => {
   const sql = "SELECT * FROM login";
   db.query(sql, (err, result) => {
@@ -611,10 +645,10 @@ app.post('/recover-password', (req, res) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Erro ao enviar o email de recuperação: " + error);
-          return res.status(500).json("Erro ao enviar o email de recuperação");
+          return res.status(500).json({ message: "Erro ao enviar o email de recuperação" });
         }
 
-        return res.json("Email de recuperação enviado com sucesso");
+        return res.status(200).json({ message: "Email de recuperação enviado com sucesso", recoveryToken });
       });
     });
   });

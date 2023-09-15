@@ -680,6 +680,129 @@ app.post('/recover-password', (req, res) => {
   });
 });
 
+app.post("/user/:token/sugestoes", (req, res) => {
+  const token = req.params.token;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+    const { sugestao } = req.body;
+
+    const sql = "INSERT INTO sugestoes (userId, sugestao) VALUES (?, ?)";
+    const values = [userId, sugestao];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao criar a sugestão técnica");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Sugestão técnica criada com sucesso");
+      } else {
+        return res.json("Falha ao criar a sugestão técnica");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+app.get("/user/:token/sugestoes", (req, res) => {
+  const token = req.params.token;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+
+    const sql = "SELECT * FROM sugestoes WHERE userId = ?";
+    const values = [userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao obter as sugestões técnicas");
+      }
+
+      // Mapear os resultados do banco de dados para um formato desejado (opcional)
+      const sugestoes = result.map((row) => ({
+        id: row.id,
+        sugestao: row.sugestao,
+        dataCriacao: row.dataCriacao,
+      }));
+
+      return res.json(sugestoes);
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+app.put("/user/:token/sugestoes/:id", (req, res) => {
+  const token = req.params.token;
+  const sugestaoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+    const { sugestao } = req.body;
+
+    const sql = "UPDATE sugestoes SET sugestao = ? WHERE id = ? AND userId = ?";
+    const values = [sugestao, sugestaoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao atualizar a sugestão técnica");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Sugestão técnica atualizada com sucesso");
+      } else {
+        return res.json("Falha ao atualizar a sugestão técnica");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
+
+
+app.delete("/user/:token/sugestoes/:id", (req, res) => {
+  const token = req.params.token;
+  const sugestaoId = req.params.id;
+
+  try {
+    const decodedToken = jwt.verify(token, "chave-secreta");
+
+    const userId = decodedToken.userId;
+
+    const sql = "DELETE FROM sugestoes WHERE id = ? AND userId = ?";
+    const values = [sugestaoId, userId];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Erro ao executar a consulta: " + err.stack);
+        return res.status(500).json("Erro ao excluir a sugestão técnica");
+      }
+
+      if (result.affectedRows > 0) {
+        return res.json("Sugestão técnica excluída com sucesso");
+      } else {
+        return res.json("Falha ao excluir a sugestão técnica");
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao verificar o token: " + error);
+    return res.status(401).json("Token inválido");
+  }
+});
 
 
 const port = process.env.PORT || 3000;

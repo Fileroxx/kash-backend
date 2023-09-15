@@ -4,6 +4,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+
 
 require('dotenv').config();
 
@@ -43,10 +45,13 @@ db.connect((err) => {
   console.log("Conexão bem-sucedida ao banco de dados");
 });
 
+
 app.post("/signup", (req, res) => {
   const { name, email, password } = req.body;
-  const sql = "INSERT INTO login (name, email, password) VALUES (?, ?, ?)";
-  const values = [name, email, password];
+  const verificationToken = generateRandomHexCode(6); // Gera um código hexadecimal de 6 caracteres
+
+  const sql = "INSERT INTO login (name, email, password, verification_token) VALUES (?, ?, ?, ?)";
+  const values = [name, email, password, verificationToken];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -55,12 +60,33 @@ app.post("/signup", (req, res) => {
     }
 
     if (result.affectedRows > 0) {
-      return res.json("Success");
+      // Enviar o email de verificação aqui
+      const verificationLink = `https://smartfin-soluction.vercel.app/verify/${verificationToken}`;
+      const mailOptions = {
+        from: "seu_email@gmail.com",
+        to: email,
+        subject: "Verificação de Email",
+        html: `<p>Olá! Clique <a href="${verificationLink}">aqui</a> para verificar seu email.</p>`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Erro ao enviar o email de verificação: " + error);
+          return res.status(500).json({ message: "Erro ao enviar o email de verificação" });
+        }
+
+        return res.json("Success");
+      });
     } else {
       return res.json("Failed");
     }
   });
 });
+
+function generateRandomHexCode(length) {
+  return crypto.randomBytes(Math.ceil(length / 2)).toString("hex").slice(0, length);
+}
+
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
@@ -365,7 +391,7 @@ app.post("/alerta", (req, res) => {
 });
 
 
-// CREATE (Adicionar um novo gasto)
+// POST (Criar um novo gasto)
 app.post("/user/:token/gastos", (req, res) => {
   const token = req.params.token;
 
@@ -431,7 +457,6 @@ app.get("/user/:token/gastos", (req, res) => {
   }
 });
 
-// UPDATE (Atualizar um gasto existente)
 app.put("/user/:token/gastos/:id", (req, res) => {
   const token = req.params.token;
   const gastoId = req.params.id;
@@ -463,7 +488,6 @@ app.put("/user/:token/gastos/:id", (req, res) => {
   }
 });
 
-// DELETE (Excluir um gasto existente)
 
 app.delete("/user/:token/gastos/:id", (req, res) => {
   const token = req.params.token;
@@ -494,6 +518,8 @@ app.delete("/user/:token/gastos/:id", (req, res) => {
     return res.status(401).json("Token inválido");
   }
 });
+
+
 
 app.post("/user/:token/renda", (req, res) => {
   const token = req.params.token;
